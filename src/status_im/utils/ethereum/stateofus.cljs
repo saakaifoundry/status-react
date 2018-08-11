@@ -2,7 +2,8 @@
   (:refer-clojure :exclude [name])
   (:require [clojure.string :as string]
             [status-im.utils.ethereum.core :as ethereum]
-            [status-im.utils.ethereum.ens :as ens]))
+            [status-im.utils.ethereum.ens :as ens]
+            [status-im.utils.ethereum.abi-spec :as abi-spec]))
 
 (defn is-valid-name? [ens-name]
   (string/ends-with? ens-name ".stateofus.eth"))
@@ -25,10 +26,9 @@
                 ens-name
                 #(ethereum/call web3
                                 {:to %
-                                 :data (str "0x59d1d43c"
-                                            (subs (ens/namehash ens-name) 2)
-                                            "0000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000d7374617475734163636f756e7400000000000000000000000000000000000000")}
+                                 :data (abi-spec/encode "text(bytes32,string)" [(ens/namehash ens-name)
+                                                                                "statusAccount"])}
                                 (fn [_ text] (cb (ethereum/hex->string (subs text 130 394)))))))
 
-#_(addr (:web3 @re-frame.db/app-db) "0x112234455c3a32fd11230c42e7bccd4a84e02010" "erictest.stateofus.eth" println)
-#_(text (:web3 @re-frame.db/app-db) "0x112234455c3a32fd11230c42e7bccd4a84e02010" "erictest.stateofus.eth" println)
+#_(addr (:web3 @re-frame.db/app-db) "0x112234455c3a32fd11230c42e7bccd4a84e02010" "anna.stateofus.eth" println)
+#_(text (:web3 @re-frame.db/app-db) "0x112234455c3a32fd11230c42e7bccd4a84e02010" "Chuone.stateofus.eth" println)

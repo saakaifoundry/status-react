@@ -236,15 +236,15 @@
   [{::keys [type size array power] :as param}]
   (if array
     (let [{::keys [size]} (last array)]
-      {:type :array
+      {:type     :array
        :dynamic? (nil? size)
        :array-of (parse-param (update param ::array butlast))})
     (let [type (keyword type)
-          param {:type type
+          param {:type     type
                  :dynamic? (or (= type :string)
                                (and (= type :bytes)
                                     (nil? size)))
-                 :size size}]
+                 :size     size}]
       (if power
         (assoc param :power power)
         param))))
