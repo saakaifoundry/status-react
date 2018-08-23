@@ -2,7 +2,7 @@
 
  :run-options {:android {"appIdSuffix" "debug"}}
 
- :figwheel-bridge "figwheel-bridge.js"
+ :figwheel-bridge "./figwheel-bridge.js"
  ;; JS modules
  :js-modules ["realm"
               "react-native-i18n"
