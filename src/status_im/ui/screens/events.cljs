@@ -1,5 +1,6 @@
 (ns status-im.ui.screens.events
   (:require status-im.chat.events
+            status-im.debug.events
             status-im.network.events
             [status-im.transport.handlers :as transport.handlers]
             status-im.protocol.handlers
@@ -336,6 +337,7 @@
                          [:initialize-dapp-permissions]
                          [:send-account-update-if-needed]
                          [:process-pending-messages]
+                         [:start-http-server {:address address :force-start? true}]
                          [:update-wallet]
                          [:update-transactions]
                          (when platform/mobile? [:get-fcm-token])

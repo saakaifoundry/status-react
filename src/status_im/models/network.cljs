@@ -35,7 +35,7 @@
        (map :error)
        (not-any? identity)))
 
-(defn- new-network [{:keys [random-id]} network-name upstream-url type network-id]
+(defn new-network [random-id network-name upstream-url type network-id]
   (let [data-dir (str "/ethereum/" (name type) "_rpc")
         config   {:NetworkId      (or (when network-id (int network-id))
                                       (ethereum/chain-keyword->chain-id type))
@@ -55,15 +55,27 @@
            (update-in [:networks/manage input-key] assoc :value value)
            (update-in [:networks/manage] validate-manage))})
 
-(defn save [{{:networks/keys [manage] :account/keys [account] :as db} :db :as cofx}]
-  (when (valid-manage? manage)
-    (let [{:keys [name url chain network-id]} manage
-          network                  (new-network cofx (:value name) (:value url) (:value chain) (:value network-id))
-          new-networks             (merge {(:id network) network} (:networks account))]
-      (handlers-macro/merge-fx cofx
-                               {:db       (dissoc db :networks/manage)
-                                :dispatch [:navigate-back]}
-                               (accounts.utils/account-update {:networks new-networks})))))
+(defn- save-on-success [on-success network-id cofx]
+  (when on-success
+    (on-success network-id)))
+
+(defn save
+  ([cofx]
+   (save cofx nil))
+  ([{{:network/keys [manage]
+      :account/keys [account] :as db} :db :as cofx}
+    {:keys [data on-success on-failure]}]
+   (let [data (or data manage)]
+     (if (valid-manage? data)
+       (let [{:keys [name url chain network-id]} data
+             network      (new-network (:random-id cofx) (:value name) (:value url) (:value chain) (:value network-id))
+             new-networks (merge {(:id network) network} (:networks account))]
+         (handlers-macro/merge-fx cofx
+                                  {:db (dissoc db :networks/manage)}
+                                  (save-on-success on-success (:id network))
+                                  (accounts.utils/account-update {:networks new-networks})))
+       (when on-failure
+         (on-failure))))))
 
 ;; No edit functionality actually implemented
 (defn edit [{db :db}]
